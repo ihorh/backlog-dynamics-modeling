@@ -1,0 +1,19 @@
+[project]
+name = "backlog-dynamics-modeling"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "ihor", email = "Ihor.Halaniuk@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "streamlit>=1.54.0",
+]
+
+[project.scripts]
+backlog-dynamics-modeling = "backlog_dynamics_modeling:main"
+
+[build-system]
+requires = ["uv_build>=0.10.2,<0.11.0"]
+build-backend = "uv_build"
