@@ -27,12 +27,19 @@ st.header("From Deterministic Trends to Probabilistic Forecasts")
 r"""
 > Recently, I've been exploring stochastic processes and their applications in finance.
 > While simulating stock price paths, I quickly noticed how similar the underlying
-> mechanics were to a problem I had modelled years ago in spreadsheets: answering
-> the seemingly simple but persistently difficult question - “When will it be done?”
+> mechanics were to a project management problem I had modelled years ago in spreadsheets:
+> answering the seemingly simple but persistently difficult question - “When will it be done?”
 >
 > I decided to recreate that earlier model in Python — and a few hours later,
 > I was ready to publish the results.
 """
+
+st.subheader("About")
+
+st.markdown(
+    "💻 **[Check out the code on GitHub](https://github.com/ihorh/backlog-dynamics-modeling)**",
+    unsafe_allow_html=True,
+)
 
 # * ========================================
 # * When will it be done?
@@ -48,7 +55,12 @@ deliberately simplifying reality to reduce the system to a tractable model.
 While estimation practices, team dynamics, and process design clearly matter,
 a coherent numerical forecast is essential for aligning expectations; without it,
 even a well-executed project delivered in reasonable time can feel late or disappointing.
-
+"""
+with st.container(border=True):
+    r"""
+    :blue[In project management producing a coherent numerical forecast is essential for aligning expectations.]
+    """
+r"""
 Although the examples come from software, the formulation applies to any domain where
 both workload and production capacity vary over time.
 """
@@ -71,6 +83,11 @@ At the start, there is only a rough expectation of duration. After three to five
 stakeholders usually ask for greater clarity — a more precise and defensible estimate
 of when the project will be completed.
 """
+with st.container(border=True):
+    r"""
+    :blue[Even in the early project stages, when exact dates are impossible, stakeholders expect clarity.
+    We need quantitative tools which will let us give a realistic range of possible completion times.]
+    """
 
 # * ========================================
 # * First Attempt
@@ -105,7 +122,7 @@ The average velocity over these sprints is `{v_mean:.2f}` story points per sprin
 But we need also account for changes in the backlog, which gives us a **net velocity** of
 `{v_mean - d_mean:.2f}` story points per sprint.
 Assuming this rate continues and the scope remains fixed, a straightforward extrapolation yields an estimated
-total duration of approximately `32` sprints.
+total duration of approximately `33` sprints.
 
 This implies a linear burn-down trajectory:
 """
@@ -115,17 +132,17 @@ st.pyplot(fig)
 est = DeterministicProjectEstimator(project, base_sprints_number=5, max_sprints_number=8)
 fig = prj_chart_backlog_trajectory(bs=est.backlog_size(), chart_subtitle="zoom-in")
 st.pyplot(fig)
-
+st.caption("""Note: sprint numbers are 0-based, so e.g. 33rd sprint has number 32.""")
 r"""
 However, even after just five sprints, a concern emerges: why should we assume the net velocity
 will continue at exactly the same level?
 
-The average does capture variation in a basic sense — it is neither the best nor the worst
-sprint — but it compresses all possible trajectories into a single number.
+The average does capture variation in a basic sense - it is neither the best nor the worst
+sprint - but it compresses all possible trajectories into a single number.
 """
 
 st.warning("""
-A completion date derived from this average cannot be treated as guaranteed.
+A completion date derived from simple average cannot be treated as guaranteed.
 Even if the input data perfectly reflects variability in velocity and backlog
 changes, this number ignores how outcomes could spread. Relying on it alone
 creates a false sense of certainty.
@@ -249,7 +266,7 @@ st.subheader("Simulation Results - Details")
 
 rf"""
 Initial data for all simulation runs was the same:
-* Backlog size: `{BACKLOG_INITIAL_SIZE}`
+* Initial Backlog Size: `{BACKLOG_INITIAL_SIZE}`
 * Completed sprints: `{CURRENT_SPRINT}`
 * Velocity Avg / Std: `{v_mean:.2f}` / `{v_std:.2f}`
 * Backlog Delta Avg / Std: `{d_mean:.2f}` / `{d_std:.2f}`
@@ -297,8 +314,8 @@ delta stays low, and the team keeps gaining ground.
 
 In the slower cases, volatility plays out differently. The realized average backlog delta ends up higher
 than the model parameter ({d_mean:.2f} vs 20.25 vs 25.65). Statistically, this is simply variance at work -
-on a finite path, the observed mean does not have to converge to the expected one. But practically,
-it means that scope growth slightly outpaces delivery for long enough to stretch the timeline.
+on a finite path, the observed mean does not have to converge to the expected one. But in practice,
+it illustrates that scope growth which slightly outpaces delivery for long enough stretches the timeline.
 
 Velocity barely changes across scenarios. What truly separates a 23-sprint project from a 49-sprint one
 is how backlog volatility resolves over time - whether fluctuations cancel out, or gradually accumulate.
