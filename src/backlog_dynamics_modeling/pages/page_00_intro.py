@@ -1,9 +1,11 @@
+from cProfile import label
 from collections.abc import Sequence
 from functools import partial
 
 import numpy as np
 import pandas as pd
 import streamlit as st
+from scipy.stats import invgauss
 
 from backlog_dynamics_modeling.initial_data import BACKLOG_INITIAL_SIZE, CURRENT_SPRINT, PRJ_NAME, read_sprints_data
 from backlog_dynamics_modeling.project.charts import chart_distribution_histogram, prj_chart_backlog_trajectory
@@ -356,6 +358,15 @@ Following histogram chart illustrates this point.
 
 durations = sim_results_df["duration"].to_numpy()
 fig, ax1, ax2 = chart_distribution_histogram(durations)
+
+params = invgauss.fit(durations)
+xs = np.linspace(durations.min(), durations.max(), 500)
+ys_invg_pdf = invgauss.pdf(xs, *params)
+invg_mode = xs[np.argmax(ys_invg_pdf)]
+ax1.plot(xs, ys_invg_pdf, color="green", label="Inverse Gaussian Distribution")
+ax1.axvline(invg_mode, color="green", linestyle="--", label=f"Mode (Inv G): {invg_mode:.2f}", lw=0.5)
+fig.legend(loc="upper left")
+
 st.pyplot(fig)
 
 st.subheader("Interactive Probability Histogram 📈")
