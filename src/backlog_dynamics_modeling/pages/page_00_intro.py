@@ -3,13 +3,10 @@ from functools import partial
 
 import numpy as np
 import pandas as pd
-import scipy
 import streamlit as st
-from matplotlib import pyplot as plt
-from scipy.stats import norm
 
 from backlog_dynamics_modeling.initial_data import BACKLOG_INITIAL_SIZE, CURRENT_SPRINT, PRJ_NAME, read_sprints_data
-from backlog_dynamics_modeling.project.charts import prj_chart_backlog_trajectory
+from backlog_dynamics_modeling.project.charts import chart_distribution_histogram, prj_chart_backlog_trajectory
 from backlog_dynamics_modeling.project.project import (
     DeterministicProjectEstimator,
     Project,
@@ -256,9 +253,16 @@ The first estimate only looked at averages, assuming the team would hit the same
 every sprint. Reality is messier: some sprints are faster, some slower, and the backlog keeps
 shifting. Running thousands of simulated project paths shows that slower sequences matter -
 a few dips here and there add up, pushing likely completion further out.
-
-The 38-sprint figure isn't a prediction of doom; it's a realistic outcome that reflects the ups and downs,
-and a timeline the team can actually commit to without expecting excessive overtime or long Fridays.
+"""
+with st.container(border=True):
+    r"""
+    :blue[Instead of a single date, give stakeholders a range with confidence levels.
+    For example: “We are 85% confident the team will finish within 38 sprints.”]
+    """
+r"""
+The `38`-sprint figure isn't just a pessimistic forecast; it's a realistic outcome that reflects
+the ups and downs, and a timeline the team can actually commit to without expecting excessive
+overtime or long Fridays.
 """
 
 
@@ -313,7 +317,7 @@ Scope is actively managed. The backlog is volatile, yet it doesn't drift upward.
 delta stays low, and the team keeps gaining ground.
 
 In the slower cases, volatility plays out differently. The realized average backlog delta ends up higher
-than the model parameter ({d_mean:.2f} vs 20.25 vs 25.65). Statistically, this is simply variance at work -
+than the model parameter (`{d_mean:.2f}` vs `20.25` vs `25.65`). Statistically, this is simply variance at work -
 on a finite path, the observed mean does not have to converge to the expected one. But in practice,
 it illustrates that scope growth which slightly outpaces delivery for long enough stretches the timeline.
 
@@ -351,40 +355,63 @@ Following histogram chart illustrates this point.
 """
 
 durations = sim_results_df["duration"].to_numpy()
-d_min, d_max = durations.min(), durations.max()
-xs = np.linspace(d_min, d_max, 500)
-mu, sigma = np.mean(durations), np.std(durations, ddof=0)
-mode = scipy.stats.mode(durations)[0]
-
-fig, ax1 = plt.subplots(figsize=(8, 4))
-fig.suptitle("Monte Carlo Distribution of Project Duration")
-ax1.hist(
-    durations,
-    color="indigo",
-    alpha=0.7,
-    density=True,
-    bins=np.arange(d_min, d_max + 1),
-)
-ax1.xaxis.set_label_text("Project Duration (sprints)")
-ax1.yaxis.set_label_text("Frequency")
-ax1.grid(visible=True, linestyle="--", alpha=0.3)
-
-normdist = norm(mu, sigma)
-ax1.plot(xs, normdist.pdf(xs), color="black", lw=2, label="Normal Distribution")
-ax1.axvline(mu, color="orange", linestyle="--", label=f"Mean: {mu:.2f}", lw=0.5)
-ax1.axvline(mode + 0.5, color="red", linestyle="--", label=f"Mode: {mode}", lw=0.5)
-
-# * cumulative probability distributions
-ax2 = ax1.twinx()
-ax2.yaxis.set_label_text("Probability")
-# * normal cumulative probability distribution
-ax2.plot(xs, normdist.cdf(xs), color="pink", lw=1, label="Cumulative Distribution (normal)")
-# * Empirical CDF from simulations
-bins = np.arange(durations.min(), durations.max() + 2)  # +2 to include the last edge
-hist, edges = np.histogram(durations, bins=bins)
-cdf_model = np.cumsum(hist) / hist.sum()
-ax2.plot(edges[:-1], cdf_model, color="red", lw=1, label="Cumulative Distribution (model)")
-
-fig.legend(loc="upper left")
-
+fig, ax1, ax2 = chart_distribution_histogram(durations)
 st.pyplot(fig)
+
+st.subheader("Interactive Probability Histogram")
+r"""
+Even a simple probability distribution histogram can be a powerful communication tool.
+By interacting with it, you can pick a confidence level and immediately see the range
+of likely project durations, making uncertainty tangible for stakeholders.
+"""
+
+@st.fragment
+def fr_histogram_interactive(ds: np.ndarray) -> None:
+    conf = st.slider("Confidence Level", min_value=55, max_value=95, value=85, step=5, format="%i%%") / 100
+    bins = np.arange(ds.min(), ds.max() + 2)  # +2 to include the last edge
+    hist, edges = np.histogram(ds, bins=bins)
+    cdf_model = np.cumsum(hist) / hist.sum()
+    idx = np.argmax(cdf_model > conf)
+    d = edges[idx]
+    mu, sigma = np.mean(ds), np.std(ds, ddof=0)
+
+    fig, ax1, ax2 = chart_distribution_histogram(durations)
+    ax2.axhline(conf, color="green", linestyle="--", label=f"Confidence Level: {conf:.2f}%")
+    ax2.axvline(d - 1, color="green", linestyle="--", linewidth=0.7)
+    ax2.axvline(d, color="green", linestyle="--", label=f"Likely Duration: {d}")
+    ax2.scatter(d - 0.5, conf, facecolors="None", edgecolor="green", marker="o", s=64)
+    ax2.annotate(
+        f"{conf:.0%} confidence duration is {d}",
+        xy=(d - 0.5, conf),
+        xytext=(float(mu + 1.5 * sigma), conf - 0.15),
+        arrowprops={"arrowstyle": "->"},
+    )
+    fig.legend(loc="upper left")
+    st.pyplot(fig)
+
+
+fr_histogram_interactive(durations)
+
+st.header("Learning from Others")
+r"""
+The concept, I explored in this article - focusing on ranges, confidence levels, and simulated project paths —
+isn't yet mainstream in project management discussions especially in context of software project.
+
+It draws inspiration from a variety of sources.
+
+One of the sparks for this article came from John Hull's *Options, Futures, and Other Derivatives*,
+which made me think about the parallels between project management and finance - and how we can frame
+uncertainty in a similar way.
+
+Classic estimation ideas, like **3-point estimation** and **PERT**, along with practical guides such as
+Steve McConnell's *Software Estimation*, also shaped my thinking along the way.
+
+I'm grateful to the many authors, known and unknown, whose work help me shaped these ideas.
+"""
+
+with st.container(border=True):
+    r"""
+    :blue[Estimating project timelines is never exact, but understanding the range of likely outcomes helps
+    teams and stakeholders plan more realistically. By focusing on probabilities and confidence levels,
+    we replace false certainty with informed decision-making].
+    """
