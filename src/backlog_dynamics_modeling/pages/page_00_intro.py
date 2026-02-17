@@ -394,7 +394,7 @@ fr_histogram_interactive(durations)
 
 st.header("Learning from Others")
 r"""
-The concept, I explored in this article - focusing on ranges, confidence levels, and simulated project paths —
+The concept, I explored in this article - focusing on ranges, confidence levels, and simulated project paths -
 isn't yet mainstream in project management discussions especially in context of software project.
 
 It draws inspiration from a variety of sources.
@@ -413,5 +413,5 @@ with st.container(border=True):
     r"""
     :blue[Estimating project timelines is never exact, but understanding the range of likely outcomes helps
     teams and stakeholders plan more realistically. By focusing on probabilities and confidence levels,
-    we replace false certainty with informed decision-making].
+    we replace false certainty with informed decision-making.]
     """

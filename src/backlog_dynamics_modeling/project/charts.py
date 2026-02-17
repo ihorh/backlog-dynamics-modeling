@@ -40,7 +40,7 @@ def prj_chart_backlog_trajectory(
     ax1.plot(bs, color="red", label="Remaining Backlog Size")
 
     if t := np.argmax(bs <= 0):
-        ax1.axvline(float(t), color="orange", linestyle=":", label=f"Done in sprint {t}")
+        ax1.axvline(float(t), color="green", linestyle=":", label=f"Done in sprint {t}")
 
     fig.legend(bbox_to_anchor=(0.9, 0.9), loc="upper right")
 
