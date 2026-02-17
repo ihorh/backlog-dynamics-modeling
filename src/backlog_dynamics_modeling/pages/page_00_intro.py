@@ -42,7 +42,7 @@ st.markdown(
 # * When will it be done?
 # * ========================================
 
-st.header("When will it be done?")
+st.header("When will it be done? ⏱️")
 r"""
 This question is asked regularly — by product managers, stakeholders, and leadership.
 
@@ -55,7 +55,7 @@ even a well-executed project delivered in reasonable time can feel late or disap
 """
 with st.container(border=True):
     r"""
-    :blue[In project management producing a coherent numerical forecast is essential for aligning expectations.]
+    💡 :blue[In project management producing a coherent numerical forecast is essential for aligning expectations.]
     """
 r"""
 Although the examples come from software, the formulation applies to any domain where
@@ -66,7 +66,7 @@ both workload and production capacity vary over time.
 # * The Project
 # * ========================================
 
-st.header("The Project")
+st.header("The Project 🛠️")
 
 r"""
 A team begins work on a new project. As is typical, the scope is only partially defined:
@@ -82,7 +82,7 @@ of when the project will be completed.
 """
 with st.container(border=True):
     r"""
-    :blue[Even in the early project stages, when exact dates are impossible, stakeholders expect clarity.
+    🤷 :blue[Even in the early project stages, when exact dates are impossible, stakeholders expect clarity.
     We need quantitative tools which will let us give a realistic range of possible completion times.]
     """
 
@@ -90,7 +90,7 @@ with st.container(border=True):
 # * First Attempt
 # * ========================================
 
-st.header("First Attempt")
+st.header("First Attempt 🧮")
 
 data = read_sprints_data()
 backlog_size_5s = BACKLOG_INITIAL_SIZE - data[:CURRENT_SPRINT]["v"].sum() + data[:CURRENT_SPRINT]["d"].sum()
@@ -153,7 +153,7 @@ Understanding the range of possible results requires a different approach to ana
 # * The Simulation
 # * ========================================
 
-st.header("The Simulation")
+st.header("The Simulation 🎲🎲")
 r"""
 Imagine running the project not just once, but many times, letting the numbers play out in
 slightly different ways each time. For each simulation, sprint velocity and backlog changes
@@ -221,7 +221,7 @@ with st.echo():
     if count_not_completed > 0:
         st.error(f"Not completed count: {count_not_completed}")
 
-st.subheader("Simulation Results")
+st.subheader("Simulation Results 📊")
 r"""
 After running the project simulation roughly 4,000 times, we can see not just an average,
 but the full spread of what might happen. Let's take a closer look at the results.
@@ -238,7 +238,7 @@ of `4.4` sprints. That translates to a window of uncertainty of roughly `9` spri
 the project could realistically finish much earlier or later than expected. If
 a sprint lasts two weeks, that's more than **four months of potential wiggle**,
 enough to surprise even the most confident stakeholders.
-* Some simulations finish in just `21` sprints. In a real project, this is highly unlikely -
+* Some simulations finish in just `21` sprints 🚀. In a real project, this is highly unlikely -
 definitely not something to rely on — but theoretically, it's possible.
 * The average of `33` sprints also means that half of the simulations take longer than that.
 * The `85%` or `90%` percentiles are more practical for stakeholder communication.
@@ -256,7 +256,7 @@ a few dips here and there add up, pushing likely completion further out.
 """
 with st.container(border=True):
     r"""
-    :blue[Instead of a single date, give stakeholders a range with confidence levels.
+    ✨ :blue[Instead of a single date, give stakeholders a range with confidence levels.
     For example: “We are 85% confident the team will finish within 38 sprints.”]
     """
 r"""
@@ -266,7 +266,7 @@ overtime or long Fridays.
 """
 
 
-st.subheader("Simulation Results - Details")
+st.subheader("Simulation Results - Details 🔍")
 
 rf"""
 Initial data for all simulation runs was the same:
@@ -342,7 +342,7 @@ a distribution.
 This structure naturally introduces asymmetry:
 
 * finishing much earlier than average requires consistently strong progress,
-* while finishing later can result from just a few unfavorable streaks.
+* while finishing later can result from just a few unfavorable streaks ☔.
 
 As a result, we should expect a distribution that is roughly bell-shaped near the center but slightly right-skewed,
 with a longer upper tail.
@@ -358,7 +358,7 @@ durations = sim_results_df["duration"].to_numpy()
 fig, ax1, ax2 = chart_distribution_histogram(durations)
 st.pyplot(fig)
 
-st.subheader("Interactive Probability Histogram")
+st.subheader("Interactive Probability Histogram 📈")
 r"""
 Even a simple probability distribution histogram can be a powerful communication tool.
 By interacting with it, you can pick a confidence level and immediately see the range
@@ -392,7 +392,7 @@ def fr_histogram_interactive(ds: np.ndarray) -> None:
 
 fr_histogram_interactive(durations)
 
-st.header("Learning from Others")
+st.header("Learning from Others 📚")
 r"""
 The concept, I explored in this article - focusing on ranges, confidence levels, and simulated project paths -
 isn't yet mainstream in project management discussions especially in context of software project.
