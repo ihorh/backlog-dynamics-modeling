@@ -6,6 +6,7 @@ import pandas as pd
 import streamlit as st
 from scipy.stats import invgauss
 
+from backlog_dynamics_modeling.config import GITHUB_REPO_URL
 from backlog_dynamics_modeling.initial_data import BACKLOG_INITIAL_SIZE, CURRENT_SPRINT, PRJ_NAME, read_sprints_data
 from backlog_dynamics_modeling.project.charts import chart_distribution_histogram, prj_chart_backlog_trajectory
 from backlog_dynamics_modeling.project.project import (
@@ -34,10 +35,7 @@ r"""
 
 st.subheader("About")
 
-st.markdown(
-    "💻 **[Check out the code on GitHub](https://github.com/ihorh/backlog-dynamics-modeling)**",
-    unsafe_allow_html=True,
-)
+st.markdown(f"💻 **[Check out the code on GitHub]({GITHUB_REPO_URL})**")
 
 # * ========================================
 # * When will it be done?
@@ -363,6 +361,7 @@ xs = np.linspace(durations.min(), durations.max(), 500)
 ys_invg_pdf = invgauss.pdf(xs, *params)
 invg_mode = xs[np.argmax(ys_invg_pdf)]
 ax1.plot(xs, ys_invg_pdf, color="green", label="Inverse Gaussian Distribution")
+# ? inv g cdf: ax2.plot(xs, invgauss.cdf(xs, *params), color="green", label="Cumulative Distribution (Inv G)", linestyle="--")  # noqa: E501
 ax1.axvline(invg_mode, color="green", linestyle="--", label=f"Mode (Inv G): {invg_mode:.2f}", lw=0.5)
 fig.legend(loc="upper left")
 
@@ -374,6 +373,7 @@ Even a simple probability distribution histogram can be a powerful communication
 By interacting with it, you can pick a confidence level and immediately see the range
 of likely project durations, making uncertainty tangible for stakeholders.
 """
+
 
 @st.fragment
 def fr_histogram_interactive(ds: np.ndarray) -> None:
