@@ -4,7 +4,9 @@ from typing import Final
 import pandas as pd
 import streamlit as st
 
-BACKLOG_INITIAL_SIZE: Final[int] = 256
+PRJ_NAME: Final[str] = "Cat Meme Factory"
+CURRENT_SPRINT: Final[int] = 5
+BACKLOG_INITIAL_SIZE: Final[int] = 1024
 
 SPRINTS_DATA_CSV: Final[str] = """
 sprint,v,d
