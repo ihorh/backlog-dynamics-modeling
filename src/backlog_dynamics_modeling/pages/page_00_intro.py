@@ -1,4 +1,3 @@
-from cProfile import label
 from collections.abc import Sequence
 from functools import partial
 
@@ -426,3 +425,6 @@ with st.container(border=True):
     teams and stakeholders plan more realistically. By focusing on probabilities and confidence levels,
     we replace false certainty with informed decision-making.]
     """
+
+st.header("See Also")
+st.page_link("pages/page_01_inv_gauss.py")
