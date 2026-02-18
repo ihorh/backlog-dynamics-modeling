@@ -360,9 +360,10 @@ fig, ax1, ax2 = chart_distribution_histogram(durations)
 params = invgauss.fit(durations)
 xs = np.linspace(durations.min(), durations.max(), 500)
 ys_invg_pdf = invgauss.pdf(xs, *params)
+ys_invg_cdf = invgauss.cdf(xs, *params)
 invg_mode = xs[np.argmax(ys_invg_pdf)]
 ax1.plot(xs, ys_invg_pdf, color="green", label="Inverse Gaussian Distribution")
-ax2.plot(xs, invgauss.cdf(xs, *params), color="green", label="Cumulative Distribution (Inv G)", linestyle="--", linewidth=0.7)  # noqa: E501
+ax2.plot(xs, ys_invg_cdf, color="green", label="Cumulative Distribution (Inv G)", linestyle="--", linewidth=0.7)
 ax1.axvline(invg_mode, color="green", linestyle="--", label=f"Mode (Inv G): {invg_mode:.2f}", lw=0.5)
 fig.legend(loc="upper left")
 
@@ -375,10 +376,16 @@ By interacting with it, you can pick a confidence level and immediately see the 
 of likely project durations, making uncertainty tangible for stakeholders.
 """
 
+st.info("💡 Tip: Slide the confidence level — low values ❄️, high values 🎈!")
+
 
 @st.fragment
 def fr_histogram_interactive(ds: np.ndarray) -> None:
     conf = st.slider("Confidence Level", min_value=55, max_value=95, value=85, step=5, format="%i%%") / 100
+    if conf >= 0.9:  # noqa: PLR2004
+        st.balloons()
+    if conf == 0.55:  # noqa: PLR2004
+        st.snow()
     bins = np.arange(ds.min(), ds.max() + 2)  # +2 to include the last edge
     hist, edges = np.histogram(ds, bins=bins)
     cdf_model = np.cumsum(hist) / hist.sum()
