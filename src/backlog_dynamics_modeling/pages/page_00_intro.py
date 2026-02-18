@@ -395,12 +395,12 @@ def fr_histogram_interactive(ds: np.ndarray) -> None:
 
     fig, ax1, ax2 = chart_distribution_histogram(durations)
     ax2.axhline(conf, color="green", linestyle="--", label=f"Confidence Level: {conf:.2f}%")
-    ax2.axvline(d - 1, color="green", linestyle="--", linewidth=0.7)
+    ax2.axvline(d + 1, color="green", linestyle="--", linewidth=0.7)
     ax2.axvline(d, color="green", linestyle="--", label=f"Likely Duration: {d}")
-    ax2.scatter(d - 0.5, conf, facecolors="None", edgecolor="green", marker="o", s=64)
+    ax2.scatter(d, cdf_model[idx], facecolors="None", edgecolor="green", marker="o", s=64)
     ax2.annotate(
         f"{conf:.0%} confidence duration is {d}",
-        xy=(d - 0.5, conf),
+        xy=(d, cdf_model[idx]),
         xytext=(float(mu + 1.5 * sigma), conf - 0.15),
         arrowprops={"arrowstyle": "->"},
     )
