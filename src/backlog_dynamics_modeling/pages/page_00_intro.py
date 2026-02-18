@@ -362,7 +362,7 @@ xs = np.linspace(durations.min(), durations.max(), 500)
 ys_invg_pdf = invgauss.pdf(xs, *params)
 invg_mode = xs[np.argmax(ys_invg_pdf)]
 ax1.plot(xs, ys_invg_pdf, color="green", label="Inverse Gaussian Distribution")
-# ? inv g cdf: ax2.plot(xs, invgauss.cdf(xs, *params), color="green", label="Cumulative Distribution (Inv G)", linestyle="--")  # noqa: E501
+ax2.plot(xs, invgauss.cdf(xs, *params), color="green", label="Cumulative Distribution (Inv G)", linestyle="--", linewidth=0.7)  # noqa: E501
 ax1.axvline(invg_mode, color="green", linestyle="--", label=f"Mode (Inv G): {invg_mode:.2f}", lw=0.5)
 fig.legend(loc="upper left")
 

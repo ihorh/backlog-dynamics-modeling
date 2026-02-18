@@ -72,7 +72,7 @@ def chart_distribution_histogram(ds: np.ndarray) -> tuple[Figure, Axes, Axes]:
     ys_norm = normdist.pdf(xs) # pyright: ignore[reportAttributeAccessIssue]
     ax1.plot(xs, ys_norm, color="black", lw=2, label="Normal Distribution")
     ax1.axvline(float(mu), color="orange", linestyle="--", label=f"Mean: {mu:.2f}", lw=0.5)
-    ax1.axvline(mode + 0.5, color="red", linestyle="--", label=f"Mode: {mode}", lw=0.5)
+    ax1.axvline(mode, color="red", linestyle="--", label=f"Mode: {mode}", lw=0.5)
 
     # * cumulative probability distributions
     ax2 = ax1.twinx()
