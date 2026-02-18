@@ -216,13 +216,14 @@ with st.echo():
 
     sim_results = run_simulations(NUMBER_OF_SIMULATIONS)
     sim_results_df = pd.DataFrame(sim_results)
-    count_not_completed = (~sim_results_df["completed"]).sum()
-    if count_not_completed > 0:
-        st.error(f"Not completed count: {count_not_completed}")
+
+count_not_completed = (~sim_results_df["completed"]).sum()
+if count_not_completed > 0:
+    st.error(f"Not completed count: {count_not_completed}")
 
 st.subheader("Simulation Results 📊")
-r"""
-After running the project simulation roughly 4,000 times, we can see not just an average,
+rf"""
+After running the project simulation `{NUMBER_OF_SIMULATIONS}` times, we can see not just an average,
 but the full spread of what might happen. Let's take a closer look at the results.
 """
 sim_results_describe = sim_results_df["duration"].describe(percentiles=[0.5, 0.75, 0.85, 0.9, 0.99]).to_frame().T
@@ -242,7 +243,7 @@ definitely not something to rely on — but theoretically, it's possible.
 * The average of `33` sprints also means that half of the simulations take longer than that.
 * The `85%` or `90%` percentiles are more practical for stakeholder communication.
 Think of a percentile as a confidence level: for example,
-“We are 85% confident the team can complete the project in 38 sprints.”
+“We are `85%` confident the team can complete the project in `38` sprints.”
 """
 
 r"""
