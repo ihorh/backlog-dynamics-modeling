@@ -27,7 +27,7 @@ pg.run()
 with st.sidebar.container(key="sidebar_bottom"):
     st.divider()
     st.caption(f"[View the source on GitHub]({GITHUB_REPO_URL})")
-    st.caption("&copy; 2026 Ihor H.")
+    st.caption("© 2026 Ihor · [See README.md](https://github.com/ihorh/backlog-dynamics-modeling/blob/main/README.md)")
 
 st.html("""
 <style>
@@ -41,5 +41,7 @@ st.html("""
 st.divider()
 
 st.caption("""
+© 2026 Ihor H. · Code licensed under MIT · Article text licensed under CC BY 4.0
+
 This content is provided for educational purposes only and should not be considered financial or legal advice.
 """)

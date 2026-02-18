@@ -29,4 +29,9 @@ Steve McConnell's *Software Estimation*.
 
 ## License
 
-&copy; 2026 Ihor H. Released under MIT License.
+&copy; 2026 Ihor H.
+
+- **Code**: MIT License  
+- **Article / Text**: Creative Commons Attribution 4.0 International (CC BY 4.0)  
+
+For educational purposes only. This content is not financial or legal advice.
