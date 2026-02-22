@@ -16,9 +16,12 @@ pg = st.navigation(
         ),
         st.Page(
             "pages/page_01_inv_gauss.py",
-            title="(WIP) Deriving the Inverse Gaussian Solution",
+            title="From Random Walk to Inverse Gaussian",
             url_path="/inv_gauss",
         ),
+        st.Page(
+            "pages/page_02_chart_test.py",
+        )
     ],
 )
 

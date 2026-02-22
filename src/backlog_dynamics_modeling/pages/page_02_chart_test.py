@@ -1,6 +1,3 @@
-import importlib.resources
-from typing import Final
-
 import numpy as np
 import streamlit as st
 
@@ -18,26 +15,9 @@ from backlog_dynamics_modeling.project.pdpd_chart import (
 from backlog_dynamics_modeling.project.pdpd_model import (
     PDProbDModelDiscrete,
     PDProbDModelInvGauss,
+    PDProbDModelNormal,
 )
 from backlog_dynamics_modeling.project.project import Project
-
-ARTICLES_PKG: Final[str] = "backlog_dynamics_modeling.articles"
-ARTICLE_NAME: Final[str] = "backlog_inv_gauss.md"
-
-st.markdown(importlib.resources.read_text(ARTICLES_PKG, ARTICLE_NAME))
-st.divider()
-
-st.header("Sanity Check 🔬")
-rf"""
-Let's see if the inverse Gaussian distribution provides a reasonable approximation
-for the results we obtained from simulating our discrete backlog model.
-
-Here we:
-* use emprical data from `5` completed sprints
-* run Monte Carlo simulations for `{NUMBER_OF_SIMULATIONS}` paths (:violet[indigo])
-* try to predict completion time using the inverse Gaussian distribution (:red[red])
-* compare the results
-"""
 
 n_base_sprints = 5
 
@@ -54,22 +34,19 @@ sim_results = run_simulations_cache_results(project, base_sprints=n_base_sprints
 durations = sim_results["duration"].to_numpy()
 d_min, d_max = durations.min(), durations.max()
 
-model_sim = PDProbDModelDiscrete(label="Simulation", ds=durations)
+model_sim = PDProbDModelDiscrete(label="Model", ds=durations)
+model_norm = PDProbDModelNormal(label="Norm", mean=model_sim.mean, std=model_sim.ds.std())
+model_ig_fit = PDProbDModelInvGauss.fit_data(durations, label="IG Fit")
 model_ig_fpt = PDProbDModelInvGauss.first_passage_time(a=b0, mean=x_mean, std=x_std, label="IG FPT")
 
 chart = ChartProjectDurationDistribution(x_min=d_min, x_max=d_max)
 chart.plot_model(model_sim, color="indigo", types=PDProbModelPlotType.ALL)
+chart.plot_model(model_norm, color="orange", types=PDProbModelPlotType.ALL)
+chart.plot_model(model_ig_fit, color="green", types=PDProbModelPlotType.PDF | PDProbModelPlotType.CDF)
 chart.plot_model(
     model_ig_fpt,
     color="red",
-    types=PDProbModelPlotType.ALL,
+    types=PDProbModelPlotType.PDF | PDProbModelPlotType.CDF | PDProbModelPlotType.MEAN,
 )
 
 st.pyplot(chart.get_figure()[0])
-
-r"""
-Here we see that the inverse Gaussian model deviates significantly from Monte Carlo results.
-
-This discrepancy likely arises because the continuous diffusion limit fails to capture
-the combinatorial effects inherent in the discrete sprint process.
-"""

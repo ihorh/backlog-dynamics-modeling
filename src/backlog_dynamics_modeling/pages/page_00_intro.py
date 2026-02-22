@@ -1,19 +1,22 @@
-from collections.abc import Sequence
-from functools import partial
-
 import numpy as np
-import pandas as pd
 import streamlit as st
 from scipy.stats import invgauss
 
+from backlog_dynamics_modeling.computed_data import run_simulations_cache_results
 from backlog_dynamics_modeling.config import GITHUB_REPO_URL
-from backlog_dynamics_modeling.initial_data import BACKLOG_INITIAL_SIZE, CURRENT_SPRINT, PRJ_NAME, read_sprints_data
-from backlog_dynamics_modeling.project.charts import chart_distribution_histogram, prj_chart_backlog_trajectory
+from backlog_dynamics_modeling.initial_data import (
+    BACKLOG_INITIAL_SIZE,
+    CURRENT_SPRINT,
+    NUMBER_OF_SIMULATIONS,
+    PRJ_NAME,
+    read_sprints_data,
+)
+from backlog_dynamics_modeling.project.charts import prj_chart_backlog_trajectory
+from backlog_dynamics_modeling.project.pdpd_chart import chart_distribution_histogram
 from backlog_dynamics_modeling.project.project import (
     DeterministicProjectEstimator,
     Project,
     ProjectSimResult,
-    simulate_project,
 )
 
 st.title("Modeling Backlog Dynamics:")
@@ -206,18 +209,8 @@ the project from running indefenitely.
 
 st.subheader("Simulation Code")
 
-with st.echo():
-    NUMBER_OF_SIMULATIONS = 4096
-
-    @st.cache_data
-    def run_simulations(n: int) -> Sequence[ProjectSimResult]:
-        fn = partial(simulate_project, project=project, base_sprints=5, max_sprints=100)
-        return [fn(rng_seed=i) for i in range(n)]
-
-    sim_results = run_simulations(NUMBER_OF_SIMULATIONS)
-    sim_results_df = pd.DataFrame(sim_results)
-
-count_not_completed = (~sim_results_df["completed"]).sum()
+sim_results = run_simulations_cache_results(project, n=NUMBER_OF_SIMULATIONS)
+count_not_completed = (~sim_results["completed"]).sum()
 if count_not_completed > 0:
     st.error(f"Not completed count: {count_not_completed}")
 
@@ -226,7 +219,7 @@ rf"""
 After running the project simulation `{NUMBER_OF_SIMULATIONS}` times, we can see not just an average,
 but the full spread of what might happen. Let's take a closer look at the results.
 """
-sim_results_describe = sim_results_df["duration"].describe(percentiles=[0.5, 0.75, 0.85, 0.9, 0.99]).to_frame().T
+sim_results_describe = sim_results["duration"].describe(percentiles=[0.5, 0.75, 0.85, 0.9, 0.99]).to_frame().T
 r"""Simulations statistics:"""
 st.dataframe(sim_results_describe[["count", "mean", "std", "min", "max"]])
 r"""Duration percentiles:"""
@@ -280,24 +273,31 @@ Let's pick few project paths and plot them to see what is actually happening the
 
 ranges = [range(20, 24), range(32, 36), range(37, 41), range(49, 53)]
 chosen_sims: list[ProjectSimResult | None] = [None] * len(ranges)
-for sim in sim_results:
+for idx, completed, duration in sim_results[["completed", "duration"]].itertuples(index=True):
     for i, r in enumerate(ranges):
-        if chosen_sims[i] is None and sim.duration in r and sim.completed:
-            chosen_sims[i] = sim
+        if chosen_sims[i] is None and duration in r and completed:
+            chosen_sims[i] = idx
     if all(chosen_sims):
         break
 
-chosen_sims_df = pd.DataFrame(chosen_sims)
+chosen_sims_df = sim_results.loc[chosen_sims]
 chosen_sims_df["v_mean"] = chosen_sims_df["vs"].apply(np.mean)
 chosen_sims_df["v_std"] = chosen_sims_df["vs"].apply(np.std)
 chosen_sims_df["d_mean"] = chosen_sims_df["ds"].apply(np.mean)
 chosen_sims_df["d_std"] = chosen_sims_df["ds"].apply(np.std)
-chosen_sims_df = chosen_sims_df.drop(columns=["vs", "ds", "bs", "completed"])
+chosen_sims_df["x_mean"] = chosen_sims_df["v_mean"] - chosen_sims_df["d_mean"]
+chosen_sims_df["x_std_est"] = np.sqrt(chosen_sims_df["v_std"] ** 2 + chosen_sims_df["d_std"] ** 2)
+chosen_sims_df["x_std_true"] = chosen_sims_df.apply(lambda r: np.std(r["vs"] - r["ds"]), axis=1)
 
-st.dataframe(chosen_sims_df)
+vs = project.sprint_team_velocity[:5]
+ds = project.sprint_backlog_delta[:5]
+xs = np.array(vs) - np.array(ds)
+st.write(f"x_mean: {xs.mean():.2f}, x_std: {xs.std(ddof=1):.2f}")
+
+st.dataframe(chosen_sims_df.drop(columns=["vs", "ds", "bs", "completed"]))
 
 with st.container(horizontal=True):
-    for sim in chosen_sims:
+    for _idx, sim in chosen_sims_df.iterrows():
         if sim is None:
             continue
         fig = prj_chart_backlog_trajectory(bs=sim.bs, vs=sim.vs, ds=sim.ds, chart_subtitle=f"Duration: {sim.duration}")
@@ -354,7 +354,7 @@ with a longer upper tail.
 Following histogram chart illustrates this point.
 """
 
-durations = sim_results_df["duration"].to_numpy()
+durations = sim_results["duration"].to_numpy()
 fig, ax1, ax2 = chart_distribution_histogram(durations)
 
 params = invgauss.fit(durations)
@@ -365,7 +365,7 @@ invg_mode = xs[np.argmax(ys_invg_pdf)]
 ax1.plot(xs, ys_invg_pdf, color="green", label="Inverse Gaussian Distribution")
 ax2.plot(xs, ys_invg_cdf, color="green", label="Cumulative Distribution (Inv G)", linestyle="--", linewidth=0.7)
 ax1.axvline(invg_mode, color="green", linestyle="--", label=f"Mode (Inv G): {invg_mode:.2f}", lw=0.5)
-fig.legend(loc="upper left")
+fig.legend(loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.3))
 
 st.pyplot(fig)
 

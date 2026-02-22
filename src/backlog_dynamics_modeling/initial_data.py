@@ -7,6 +7,7 @@ import streamlit as st
 PRJ_NAME: Final[str] = "Cat Meme Factory"
 CURRENT_SPRINT: Final[int] = 5
 BACKLOG_INITIAL_SIZE: Final[int] = 1024
+NUMBER_OF_SIMULATIONS: Final[int] = 4096
 
 SPRINTS_DATA_CSV: Final[str] = """
 sprint,v,d
