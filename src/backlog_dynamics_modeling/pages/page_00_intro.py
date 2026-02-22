@@ -120,7 +120,7 @@ rf"""
 The average velocity over these sprints is `{v_mean:.2f}` story points per sprint.
 But we need also account for changes in the backlog, which gives us a **net velocity** of
 `{v_mean - d_mean:.2f}` story points per sprint.
-Assuming this rate continues and the scope remains fixed, a straightforward extrapolation yields an estimated
+Assuming this rate continues, a straightforward extrapolation yields an estimated
 total duration of approximately `33` sprints.
 
 This implies a linear burn-down trajectory:
@@ -434,5 +434,5 @@ with st.container(border=True):
     we replace false certainty with informed decision-making.]
     """
 
-st.header("See Also")
+st.header("Next")
 st.page_link("pages/page_01_inv_gauss.py")
