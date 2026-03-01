@@ -1,0 +1,7 @@
+[server]
+fileWatcherType = "auto"
+runOnSave = true
+
+[theme]
+base="dark"
+# baseFontSize=16
